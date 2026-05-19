@@ -1344,14 +1344,6 @@ function App() {
               <div className={`px-5 sm:px-8 py-4 sm:py-6 flex items-center justify-between ${
                 isDark ? 'border-zinc-900/60 bg-zinc-950/10' : 'border-slate-100 bg-slate-50/15'
               }`}>
-                {/* Keyboard Shortcuts Hint */}
-                <div className={`text-[10px] font-bold ${isDark ? 'text-zinc-650' : 'text-slate-400'} flex items-center gap-1.5`}>
-                  <span>⌨️</span>
-                  <span>Enter để lưu</span>
-                  <span className="mx-1.5">•</span>
-                  <span>Esc để đóng</span>
-                </div>
-
                 <div className="flex items-center gap-3.5">
                   <button 
                     type="button"
