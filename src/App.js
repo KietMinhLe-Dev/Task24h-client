@@ -37,6 +37,11 @@ const getApiBaseUrl = () => {
       const guessedApiHost = hostname.replace('-client', '-api').replace('fe.', 'be.');
       return `https://${guessedApiHost}/api/tasks`;
     }
+
+    // Support LAN / local IP routing for other devices (e.g. mobile access over local Wi-Fi)
+    if (hostname && hostname !== '') {
+      return `http://${hostname}:5000/api/tasks`;
+    }
   }
   
   return process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/tasks';
