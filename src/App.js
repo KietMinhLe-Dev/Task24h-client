@@ -616,7 +616,7 @@ function App() {
           <div className="flex items-center gap-2 text-[11px] sm:text-xs">
             <AlertTriangle className="w-4 h-4 animate-bounce text-rose-400 shrink-0" />
             <span>
-              Không thể kết nối đến Máy chủ API tại <code>{apiBaseUrl}</code>. Đã khởi chạy API server chưa, hoặc bạn đã cấu hình URL Render chưa?
+              Không thể kết nối đến Máy chủ API tại <code>{apiBaseUrl}</code>. Đã khởi chạy API server chưa, hoặc bạn đã cấu hình URL chính xác chưa?
             </span>
           </div>
           <button 
@@ -626,7 +626,7 @@ function App() {
             }}
             className="px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-all font-extrabold shadow-[0_2px_10px_rgba(244,63,94,0.3)] active:scale-95 text-[10px]"
           >
-            Liên kết URL Render Ngay
+            Cấu hình kết nối API
           </button>
         </div>
       )}
@@ -1350,15 +1350,16 @@ function App() {
                     }`}
                   />
                   <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
-                    💡 Mẹo: URL này là địa chỉ Web Service backend của bạn trên Render thêm hậu tố <code>/api/tasks</code> (Ví dụ: <code>https://task24h-api.onrender.com/api/tasks</code>).
+                    💡 Mẹo: URL này là địa chỉ Web Service backend của bạn thêm hậu tố <code>/api/tasks</code> (Ví dụ: <code>https://task24h-api.vercel.app/api/tasks</code> hoặc <code>http://localhost:5000/api/tasks</code>).
                   </p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
-                      const guess = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/tasks';
-                      setConfigUrl(guess);
+                      localStorage.removeItem('REACT_APP_API_BASE_URL');
+                      const freshDefault = getApiBaseUrl();
+                      setConfigUrl(freshDefault);
                     }}
                     className={`px-3 py-2 rounded-lg text-[10px] font-bold border transition-all ${
                       isDark
