@@ -59,7 +59,7 @@ function App() {
   const [particles, setParticles] = useState([]);
 
   // Theme State
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Modal & Form States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -128,8 +128,9 @@ function App() {
 
   useEffect(() => {
     fetchTasks(currentDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate]);
-
+ 
   // Form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
