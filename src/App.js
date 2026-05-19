@@ -46,8 +46,12 @@ const getApiBaseUrl = () => {
     if (saved) {
       try {
         const savedUrl = new URL(saved);
-        // If the saved hostname matches the current window hostname, or both are on Render, use it
-        if (savedUrl.hostname === hostname || (savedUrl.hostname.includes('onrender.com') && hostname.includes('onrender.com'))) {
+        // If the saved hostname matches the current window hostname, or both are on Render or Vercel, use it
+        if (
+          savedUrl.hostname === hostname || 
+          (savedUrl.hostname.includes('onrender.com') && hostname.includes('onrender.com')) ||
+          (savedUrl.hostname.includes('vercel.app') && hostname.includes('vercel.app'))
+        ) {
           return saved.trim();
         }
       } catch (e) {
@@ -62,16 +66,22 @@ const getApiBaseUrl = () => {
       return `https://${guessedApiHost}/api/tasks`;
     }
 
-    // 2. Support LAN / local IP routing for other devices (e.g. mobile access over local Wi-Fi)
+    // 2. Smart heuristic guess: if we are on Vercel, automatically point to the corresponding Vercel API domain
+    if (hostname.includes('vercel.app')) {
+      const guessedApiHost = hostname.replace('-client', '-api');
+      return `https://${guessedApiHost}/api/tasks`;
+    }
+
+    // 3. Support LAN / local IP routing for other devices (e.g. mobile access over local Wi-Fi)
     if (isLocalHostname(hostname)) {
       return `http://${hostname}:5000/api/tasks`;
     }
 
-    // 3. Fallback for public deployments (like Vercel vercel.app), route directly to production Render backend
-    return 'https://task24h-api.onrender.com/api/tasks';
+    // 4. Fallback for public deployments, route directly to production Vercel backend
+    return 'https://task24h-api.vercel.app/api/tasks';
   }
   
-  return process.env.REACT_APP_API_BASE_URL || 'https://task24h-api.onrender.com/api/tasks';
+  return process.env.REACT_APP_API_BASE_URL || 'https://task24h-api.vercel.app/api/tasks';
 };
 
 // Beautiful Vietnamese motivational quotes
