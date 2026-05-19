@@ -99,7 +99,8 @@ function App() {
     priority: 'medium',
     startTime: getInitialTimes().startTime,
     endTime: getInitialTimes().endTime,
-    durationHours: ''
+    durationHours: '',
+    durationMinutes: ''
   });
 
   const categories = {
@@ -164,10 +165,18 @@ function App() {
       
       // Merge with localStorage backup map to guarantee it works instantly
       const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
-      const processedData = data.map(t => ({
-        ...t,
-        durationHours: t.durationHours || localDurations[t.id] || ''
-      }));
+      const processedData = data.map(t => {
+        const local = localDurations[t.id] || {};
+        return {
+          ...t,
+          durationHours: t.durationHours !== null && t.durationHours !== undefined 
+            ? t.durationHours 
+            : (local.hours !== undefined ? local.hours : ''),
+          durationMinutes: t.durationMinutes !== null && t.durationMinutes !== undefined 
+            ? t.durationMinutes 
+            : (local.minutes !== undefined ? local.minutes : '')
+        };
+      });
 
       setTasks(processedData);
       setApiError(false);
@@ -190,10 +199,18 @@ function App() {
             
             // Merge with localStorage backup map
             const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
-            const processedFallbackData = fallbackData.map(t => ({
-              ...t,
-              durationHours: t.durationHours || localDurations[t.id] || ''
-            }));
+            const processedFallbackData = fallbackData.map(t => {
+              const local = localDurations[t.id] || {};
+              return {
+                ...t,
+                durationHours: t.durationHours !== null && t.durationHours !== undefined 
+                  ? t.durationHours 
+                  : (local.hours !== undefined ? local.hours : ''),
+                durationMinutes: t.durationMinutes !== null && t.durationMinutes !== undefined 
+                  ? t.durationMinutes 
+                  : (local.minutes !== undefined ? local.minutes : '')
+              };
+            });
 
             setTasks(processedFallbackData);
             setApiBaseUrl(fallbackUrl);
@@ -243,7 +260,8 @@ function App() {
       priority: 'medium',
       startTime: times.startTime,
       endTime: times.endTime,
-      durationHours: ''
+      durationHours: '',
+      durationMinutes: ''
     });
   };
 
@@ -251,8 +269,12 @@ function App() {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
-    if (formData.durationHours && (Number(formData.durationHours) < 1 || Number(formData.durationHours) > 24)) {
-      alert("Thời hạn đếm ngược chỉ được từ 1 đến 24 giờ!");
+    const hours = formData.durationHours ? Number(formData.durationHours) : 0;
+    const mins = formData.durationMinutes ? Number(formData.durationMinutes) : 0;
+    const totalMin = (hours * 60) + mins;
+
+    if ((formData.durationHours || formData.durationMinutes) && (totalMin < 1 || totalMin > 1440)) {
+      alert("Thời hạn đếm ngược chỉ được từ 1 phút đến 24 giờ!");
       return;
     }
 
@@ -270,6 +292,8 @@ function App() {
         body: JSON.stringify({
           ...formData,
           title: formData.title.toUpperCase(),
+          durationHours: formData.durationHours ? Number(formData.durationHours) : null,
+          durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : null,
           date: currentDate
         })
       });
@@ -279,8 +303,11 @@ function App() {
         
         // Save/Update in localStorage backup map
         const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
-        if (formData.durationHours) {
-          localDurations[savedTask.id] = Number(formData.durationHours);
+        if (formData.durationHours || formData.durationMinutes) {
+          localDurations[savedTask.id] = {
+            hours: formData.durationHours ? Number(formData.durationHours) : 0,
+            minutes: formData.durationMinutes ? Number(formData.durationMinutes) : 0
+          };
         } else {
           delete localDurations[savedTask.id];
         }
@@ -354,7 +381,8 @@ function App() {
       priority: task.priority,
       startTime: task.startTime || '09:00',
       endTime: task.endTime || '10:00',
-      durationHours: task.durationHours || ''
+      durationHours: task.durationHours || '',
+      durationMinutes: task.durationMinutes || ''
     });
     setIsModalOpen(true);
   };
@@ -391,14 +419,25 @@ function App() {
     return new Date().getTime() - 3600 * 1000;
   };
 
-  // Helper: Calculate ticking remaining seconds in a task's 24h budget
+  // Helper: Calculate ticking remaining seconds in a task's budget
   const getTaskCountdownStr = (task) => {
     const createdTime = getTaskCreationTime(task);
     const now = new Date().getTime();
     
     const elapsedSeconds = Math.floor((now - createdTime) / 1000);
-    const budgetHours = task.durationHours ? Number(task.durationHours) : 24;
-    const totalSeconds = budgetHours * 60 * 60; 
+    
+    const hasHours = task.durationHours !== null && task.durationHours !== undefined && task.durationHours !== '';
+    const hasMinutes = task.durationMinutes !== null && task.durationMinutes !== undefined && task.durationMinutes !== '';
+    
+    let totalSeconds;
+    if (hasHours || hasMinutes) {
+      const h = hasHours ? Number(task.durationHours) : 0;
+      const m = hasMinutes ? Number(task.durationMinutes) : 0;
+      totalSeconds = (h * 60 * 60) + (m * 60);
+    } else {
+      totalSeconds = 24 * 60 * 60;
+    }
+
     const remainingSeconds = totalSeconds - elapsedSeconds;
     
     if (remainingSeconds <= 0) {
@@ -1054,26 +1093,50 @@ function App() {
 
                   <div className={`h-[1px] w-full ${isDark ? 'bg-zinc-900/80' : 'bg-slate-100'}`} />
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <label className="text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
-                      ⏳ Thời hạn đếm ngược (Số giờ)
+                      ⏳ Thời hạn đếm ngược (Mặc định 24h)
                     </label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      max="24"
-                      placeholder="Mặc định là 24 giờ nếu để trống..."
-                      value={formData.durationHours}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || (Number(val) >= 1 && Number(val) <= 24)) {
-                          setFormData({ ...formData, durationHours: val });
-                        }
-                      }}
-                      className={`w-full text-sm font-bold bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
-                        isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
-                      }`}
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className={`p-3 rounded-2xl border ${isDark ? 'border-zinc-800 bg-zinc-950/20' : 'border-slate-100 bg-slate-50/50'} space-y-1`}>
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isDark ? 'text-zinc-650' : 'text-slate-400'}`}>Số giờ</span>
+                        <input 
+                          type="number" 
+                          min="0" 
+                          max="24"
+                          placeholder="Giờ..."
+                          value={formData.durationHours}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '' || (Number(val) >= 0 && Number(val) <= 24)) {
+                              setFormData({ ...formData, durationHours: val });
+                            }
+                          }}
+                          className={`w-full text-sm font-bold bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
+                            isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
+                          }`}
+                        />
+                      </div>
+                      <div className={`p-3 rounded-2xl border ${isDark ? 'border-zinc-800 bg-zinc-950/20' : 'border-slate-100 bg-slate-50/50'} space-y-1`}>
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isDark ? 'text-zinc-650' : 'text-slate-400'}`}>Số phút</span>
+                        <input 
+                          type="number" 
+                          min="0" 
+                          max="59"
+                          placeholder="Phút..."
+                          value={formData.durationMinutes}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '' || (Number(val) >= 0 && Number(val) <= 59)) {
+                              setFormData({ ...formData, durationMinutes: val });
+                            }
+                          }}
+                          className={`w-full text-sm font-bold bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
+                            isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
+                          }`}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1186,8 +1249,8 @@ function App() {
                   >
                     {editingTask 
                       ? "Lưu thay đổi" 
-                      : formData.durationHours 
-                        ? `Kích hoạt ${formData.durationHours}h` 
+                      : (formData.durationHours || formData.durationMinutes)
+                        ? `Kích hoạt ${formData.durationHours ? formData.durationHours + 'h' : ''}${formData.durationMinutes ? ' ' + formData.durationMinutes + 'm' : ''}`.trim()
                         : "Kích hoạt 24h"}
                   </button>
                 </div>
