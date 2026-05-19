@@ -391,8 +391,9 @@ function App() {
     const now = new Date().getTime();
     
     const elapsedSeconds = Math.floor((now - createdTime) / 1000);
-    const total24hSeconds = 24 * 60 * 60; 
-    const remainingSeconds = total24hSeconds - elapsedSeconds;
+    const budgetHours = task.durationHours ? Number(task.durationHours) : 24;
+    const totalSeconds = budgetHours * 60 * 60; 
+    const remainingSeconds = totalSeconds - elapsedSeconds;
     
     if (remainingSeconds <= 0) {
       return "expired";
@@ -1171,7 +1172,11 @@ function App() {
                     type="submit"
                     className="text-xs font-extrabold px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-650 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl transition-all shadow-[0_4px_20px_rgba(99,102,241,0.2)] transform hover:-translate-y-0.5 active:translate-y-0"
                   >
-                    {editingTask ? "Lưu thay đổi" : "Kích hoạt 24h"}
+                    {editingTask 
+                      ? "Lưu thay đổi" 
+                      : formData.durationHours 
+                        ? `Kích hoạt ${formData.durationHours}h` 
+                        : "Kích hoạt 24h"}
                   </button>
                 </div>
               </div>
