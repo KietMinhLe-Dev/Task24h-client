@@ -26,11 +26,22 @@ import {
 
 // Dynamic API URL getter with a smart heuristic domain fallback
 const getApiBaseUrl = () => {
-  const saved = localStorage.getItem('REACT_APP_API_BASE_URL');
-  if (saved) return saved.trim();
-  
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    const saved = localStorage.getItem('REACT_APP_API_BASE_URL');
+    
+    if (saved) {
+      try {
+        const savedUrl = new URL(saved);
+        // If the saved hostname matches the current window hostname, or both are on Render, use it
+        if (savedUrl.hostname === hostname || (savedUrl.hostname.includes('onrender.com') && hostname.includes('onrender.com'))) {
+          return saved.trim();
+        }
+      } catch (e) {
+        localStorage.removeItem('REACT_APP_API_BASE_URL');
+      }
+    }
+    
     // Smart heuristic guess: if we are on Render, automatically point to the corresponding API domain
     if (hostname.includes('onrender.com')) {
       // Replaces -client with -api automatically to find the deployed backend service
