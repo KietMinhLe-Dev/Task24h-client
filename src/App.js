@@ -1084,7 +1084,7 @@ function App() {
       {/* RAYCAST / SUPERHUMAN STYLE PREMIUM COMMAND SLATE */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/85 backdrop-blur-md transition-all duration-300 animate-fadeIn">
-          <div className={`relative w-full max-w-4xl border rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-300 ring-1 ${
+          <div className={`relative w-full max-w-4xl max-h-[90vh] overflow-y-auto border rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 ring-1 ${
             isDark 
               ? 'bg-[#0c0b11] border-zinc-900 ring-white/5 shadow-black' 
               : 'bg-white border-slate-200 ring-black/5'
@@ -1094,7 +1094,7 @@ function App() {
             <div className="h-[4px] w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
 
             {/* Modal Header */}
-            <div className={`px-8 py-6 border-b flex items-center justify-between ${
+            <div className={`px-5 sm:px-8 py-4 sm:py-6 border-b flex items-center justify-between ${
               isDark ? 'border-zinc-900/50 bg-zinc-950/15' : 'border-slate-100 bg-slate-50/30'
             }`}>
               <div className="flex items-center gap-3">
@@ -1121,9 +1121,9 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-zinc-900/60">
                 
                 {/* LEFT PANEL: Writing Canvas (Cols 7) */}
-                <div className="md:col-span-7 p-8 space-y-6">
+                <div className="md:col-span-7 p-5 sm:p-8 space-y-4 sm:space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
+                    <label className="text-[10px] sm:text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
                       Tiêu đề kế hoạch
                     </label>
                     <input 
@@ -1131,8 +1131,8 @@ function App() {
                       placeholder="Nhập mục tiêu cần hoàn thành..."
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value.toUpperCase() })}
-                      className={`w-full text-xl sm:text-2xl font-black bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
-                        isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
+                      className={`w-full text-lg sm:text-2xl font-black bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
+                        isDark ? 'text-white placeholder-zinc-805' : 'text-slate-805 placeholder-slate-350'
                       }`}
                       required
                     />
@@ -1141,15 +1141,15 @@ function App() {
                   <div className={`h-[1px] w-full ${isDark ? 'bg-zinc-900/80' : 'bg-slate-100'}`} />
 
                   <div className="space-y-2">
-                    <label className="text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
+                    <label className="text-[10px] sm:text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
                       Mô tả chi tiết
                     </label>
                     <textarea 
                       placeholder="Ghi chú các bước thực hiện để dễ dàng theo dõi..."
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className={`w-full text-sm sm:text-base bg-transparent border-none outline-none focus:outline-none focus:ring-0 p-0 resize-none h-44 ${
-                        isDark ? 'text-zinc-300 placeholder-zinc-800 font-medium leading-relaxed' : 'text-slate-700 placeholder-slate-405 leading-relaxed'
+                      className={`w-full text-xs sm:text-base bg-transparent border-none outline-none focus:outline-none focus:ring-0 p-0 resize-none h-28 sm:h-44 ${
+                        isDark ? 'text-zinc-300 placeholder-zinc-805 font-medium leading-relaxed' : 'text-slate-700 placeholder-slate-405 leading-relaxed'
                       }`}
                     />
                   </div>
@@ -1204,16 +1204,16 @@ function App() {
                 </div>
 
                 {/* RIGHT PANEL: Metadata Attributer (Cols 5) */}
-                <div className={`md:col-span-5 p-8 space-y-7 ${
+                <div className={`md:col-span-5 p-5 sm:p-8 space-y-5 sm:space-y-7 ${
                   isDark ? 'bg-zinc-950/20' : 'bg-slate-50/30'
                 }`}>
                   
                   {/* Category Assignment */}
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
+                  <div className="space-y-3 sm:space-y-4">
+                    <label className="text-[10px] sm:text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
                       📁 Phân loại danh mục
                     </label>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="flex flex-wrap gap-2">
                       {Object.entries(categories).map(([key, cat]) => {
                         const isSelected = formData.category === key;
                         return (
@@ -1221,7 +1221,7 @@ function App() {
                             key={key}
                             type="button"
                             onClick={() => setFormData({ ...formData, category: key })}
-                            className={`px-4 py-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
+                            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-[11px] sm:text-xs font-bold flex items-center gap-1.5 sm:gap-2 transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
                               isSelected
                                 ? isDark
                                   ? 'bg-indigo-500/15 border-indigo-500 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
@@ -1240,11 +1240,11 @@ function App() {
                   </div>
 
                   {/* Priority Assignment */}
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
+                  <div className="space-y-3 sm:space-y-4">
+                    <label className="text-[10px] sm:text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
                       ⚡ Mức độ ưu tiên
                     </label>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="flex flex-wrap gap-2">
                       {Object.entries(priorities).map(([key, pri]) => {
                         const isSelected = formData.priority === key;
                         
@@ -1265,7 +1265,7 @@ function App() {
                             key={key}
                             type="button"
                             onClick={() => setFormData({ ...formData, priority: key })}
-                            className={`px-4.5 py-2.5 rounded-xl border font-bold text-xs flex items-center gap-2 transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
+                            className={`px-3.5 sm:px-4.5 py-2 sm:py-2.5 rounded-xl border font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
                               isSelected
                                 ? activeStyles[key]
                                 : isDark
@@ -1273,7 +1273,7 @@ function App() {
                                   : 'bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                             }`}
                           >
-                            <span className={`w-2 h-2 rounded-full ${pri.dot}`} />
+                            <span className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${pri.dot}`} />
                             <span>{pri.label}</span>
                           </button>
                         );
@@ -1285,7 +1285,7 @@ function App() {
               </div>
 
               {/* Actions Footer with Power-User Hints */}
-              <div className={`px-8 py-6 flex items-center justify-between ${
+              <div className={`px-5 sm:px-8 py-4 sm:py-6 flex items-center justify-between ${
                 isDark ? 'border-zinc-900/60 bg-zinc-950/10' : 'border-slate-100 bg-slate-50/15'
               }`}>
                 {/* Keyboard Shortcuts Hint */}
