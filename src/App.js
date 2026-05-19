@@ -267,6 +267,47 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate, apiBaseUrl]);
 
+  // Global keyboard shortcuts helper for modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Esc to close modals
+      if (e.key === 'Escape') {
+        if (isModalOpen) {
+          setIsModalOpen(false);
+          setEditingTask(null);
+        }
+        if (isConfigOpen) {
+          setIsConfigOpen(false);
+        }
+      }
+
+      // Enter to submit
+      if (e.key === 'Enter') {
+        // Ctrl + Enter or Cmd + Enter always submits
+        if (e.ctrlKey || e.metaKey) {
+          if (isModalOpen) {
+            e.preventDefault();
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.click();
+          }
+        } else {
+          // Standard Enter submits only if not focused on textarea/button to avoid interrupting typing or button actions
+          if (isModalOpen) {
+            const activeTag = document.activeElement?.tagName;
+            if (activeTag !== 'TEXTAREA' && activeTag !== 'BUTTON') {
+              e.preventDefault();
+              const submitBtn = document.querySelector('button[type="submit"]');
+              if (submitBtn) submitBtn.click();
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, isConfigOpen]);
+
   const resetForm = () => {
     const times = getInitialTimes();
     setFormData({
