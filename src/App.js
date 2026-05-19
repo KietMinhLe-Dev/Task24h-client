@@ -1083,8 +1083,8 @@ function App() {
 
       {/* RAYCAST / SUPERHUMAN STYLE PREMIUM COMMAND SLATE */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/85 backdrop-blur-md transition-all duration-300 animate-fadeIn">
-          <div className={`relative w-full max-w-4xl max-h-[90vh] overflow-y-auto border rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300 ring-1 ${
+        <div className="fixed inset-0 z-50 overflow-y-auto p-4 py-8 bg-zinc-950/85 backdrop-blur-md transition-all duration-300 animate-fadeIn flex justify-center items-start sm:items-center">
+          <div className={`relative w-full max-w-4xl border rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-300 ring-1 ${
             isDark 
               ? 'bg-[#0c0b11] border-zinc-900 ring-white/5 shadow-black' 
               : 'bg-white border-slate-200 ring-black/5'
