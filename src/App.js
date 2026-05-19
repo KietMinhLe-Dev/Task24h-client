@@ -161,7 +161,15 @@ function App() {
         throw new Error("Failed to contact the API Server");
       }
       const data = await response.json();
-      setTasks(data);
+      
+      // Merge with localStorage backup map to guarantee it works instantly
+      const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
+      const processedData = data.map(t => ({
+        ...t,
+        durationHours: t.durationHours || localDurations[t.id] || ''
+      }));
+
+      setTasks(processedData);
       setApiError(false);
     } catch (error) {
       console.error(error);
@@ -179,7 +187,15 @@ function App() {
           const fallbackResponse = await fetch(`${fallbackUrl}?date=${currentDate}`);
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json();
-            setTasks(fallbackData);
+            
+            // Merge with localStorage backup map
+            const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
+            const processedFallbackData = fallbackData.map(t => ({
+              ...t,
+              durationHours: t.durationHours || localDurations[t.id] || ''
+            }));
+
+            setTasks(processedFallbackData);
             setApiBaseUrl(fallbackUrl);
             localStorage.setItem('REACT_APP_API_BASE_URL', fallbackUrl);
             setApiError(false);
@@ -253,6 +269,17 @@ function App() {
       });
 
       if (response.ok) {
+        const savedTask = await response.json();
+        
+        // Save/Update in localStorage backup map
+        const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
+        if (formData.durationHours) {
+          localDurations[savedTask.id] = Number(formData.durationHours);
+        } else {
+          delete localDurations[savedTask.id];
+        }
+        localStorage.setItem('REACT_APP_TASK_DURATIONS', JSON.stringify(localDurations));
+
         fetchTasks();
         setIsModalOpen(false);
         resetForm();
@@ -296,6 +323,11 @@ function App() {
         method: 'DELETE'
       });
       if (response.ok) {
+        // Clean up from localStorage backup map
+        const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
+        delete localDurations[id];
+        localStorage.setItem('REACT_APP_TASK_DURATIONS', JSON.stringify(localDurations));
+
         fetchTasks();
         setApiError(false);
       } else {
@@ -353,15 +385,14 @@ function App() {
     return new Date().getTime() - 3600 * 1000;
   };
 
-  // Helper: Calculate ticking remaining seconds in a task's dynamic budget
+  // Helper: Calculate ticking remaining seconds in a task's 24h budget
   const getTaskCountdownStr = (task) => {
     const createdTime = getTaskCreationTime(task);
     const now = new Date().getTime();
     
     const elapsedSeconds = Math.floor((now - createdTime) / 1000);
-    const budgetHours = task.durationHours ? Number(task.durationHours) : 24;
-    const totalSeconds = budgetHours * 60 * 60; 
-    const remainingSeconds = totalSeconds - elapsedSeconds;
+    const total24hSeconds = 24 * 60 * 60; 
+    const remainingSeconds = total24hSeconds - elapsedSeconds;
     
     if (remainingSeconds <= 0) {
       return "expired";
