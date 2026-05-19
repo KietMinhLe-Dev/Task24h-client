@@ -4,7 +4,6 @@ import {
   Trash2,
   Check,
   Calendar,
-  Clock3,
   Search,
   Moon,
   Sun,
@@ -873,21 +872,7 @@ function App() {
                             {category.label}
                           </div>
 
-                          {/* DYNAMIC TIME ALLOCATED BADGE (⏰ Start Time - End Time) */}
-                          <div
-                            className={`h-7 px-3.5 rounded-full text-[10px] font-extrabold flex items-center gap-1.5 border transition-all ${
-                              isDark
-                                ? 'bg-zinc-950 border-zinc-800 text-zinc-350'
-                                : 'bg-slate-50 border-slate-200 text-slate-600'
-                            }`}
-                          >
-                            <Clock3 className="w-3 h-3 text-indigo-400" />
-                            <span>
-                              {task.startTime && task.endTime 
-                                ? `${task.startTime} - ${task.endTime}` 
-                                : 'Cả ngày'}
-                            </span>
-                          </div>
+
 
                           {/* Priority Badge */}
                           <div
