@@ -251,6 +251,11 @@ function App() {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
+    if (formData.durationHours && (Number(formData.durationHours) < 1 || Number(formData.durationHours) > 24)) {
+      alert("Thời hạn đếm ngược chỉ được từ 1 đến 24 giờ!");
+      return;
+    }
+
     try {
       const method = editingTask ? 'PUT' : 'POST';
       const url = editingTask
@@ -264,6 +269,7 @@ function App() {
         },
         body: JSON.stringify({
           ...formData,
+          title: formData.title.toUpperCase(),
           date: currentDate
         })
       });
@@ -1022,7 +1028,7 @@ function App() {
                       type="text" 
                       placeholder="Nhập mục tiêu cần hoàn thành..."
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value.toUpperCase() })}
                       className={`w-full text-xl sm:text-2xl font-black bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
                         isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
                       }`}
@@ -1055,9 +1061,15 @@ function App() {
                     <input 
                       type="number" 
                       min="1" 
+                      max="24"
                       placeholder="Mặc định là 24 giờ nếu để trống..."
                       value={formData.durationHours}
-                      onChange={(e) => setFormData({ ...formData, durationHours: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '' || (Number(val) >= 1 && Number(val) <= 24)) {
+                          setFormData({ ...formData, durationHours: val });
+                        }
+                      }}
                       className={`w-full text-sm font-bold bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
                         isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
                       }`}
