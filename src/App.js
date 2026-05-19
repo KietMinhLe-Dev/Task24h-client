@@ -94,6 +94,19 @@ const MOTIVATIONAL_QUOTES = [
   "Mỗi chu kỳ 24h là một cơ hội tuyệt vời để làm mới bản thân!"
 ];
 
+// Local Storage fallback helpers for reliable offline usage
+const getLocalTasks = (date) => {
+  try {
+    return JSON.parse(localStorage.getItem(`REACT_APP_FALLBACK_TASKS_${date}`) || '[]');
+  } catch (e) {
+    return [];
+  }
+};
+
+const saveLocalTasks = (date, tasksList) => {
+  localStorage.setItem(`REACT_APP_FALLBACK_TASKS_${date}`, JSON.stringify(tasksList));
+};
+
 function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -221,52 +234,13 @@ function App() {
       });
 
       setTasks(processedData);
+      saveLocalTasks(currentDate, processedData);
       setApiError(false);
     } catch (error) {
-      console.error(error);
-      
-      // Self-healing recovery fallback in both directions (bridges task2h-api and task24h-api differences)
-      let fallbackUrl = null;
-      if (apiBaseUrl.includes('task2h-api.onrender.com')) {
-        fallbackUrl = apiBaseUrl.replace('task2h-api', 'task24h-api');
-      } else if (apiBaseUrl.includes('task24h-api.onrender.com')) {
-        fallbackUrl = apiBaseUrl.replace('task24h-api', 'task2h-api');
-      }
-
-      if (fallbackUrl) {
-        try {
-          const fallbackResponse = await fetch(`${fallbackUrl}?date=${currentDate}`);
-          if (fallbackResponse.ok) {
-            const fallbackData = await fallbackResponse.json();
-            
-            // Merge with localStorage backup map
-            const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
-            const processedFallbackData = fallbackData.map(t => {
-              const local = localDurations[t.id] || {};
-              return {
-                ...t,
-                durationHours: t.durationHours !== null && t.durationHours !== undefined 
-                  ? t.durationHours 
-                  : (local.hours !== undefined ? local.hours : ''),
-                durationMinutes: t.durationMinutes !== null && t.durationMinutes !== undefined 
-                  ? t.durationMinutes 
-                  : (local.minutes !== undefined ? local.minutes : '')
-              };
-            });
-
-            setTasks(processedFallbackData);
-            setApiBaseUrl(fallbackUrl);
-            localStorage.setItem('REACT_APP_API_BASE_URL', fallbackUrl);
-            setApiError(false);
-            setLoading(false);
-            return;
-          }
-        } catch (fbErr) {
-          console.error("Self-healing fallback failed:", fbErr);
-        }
-      }
-      
-      setApiError(true);
+      console.error("API Connection failed, reading local tasks:", error);
+      const fallbackTasks = getLocalTasks(currentDate);
+      setTasks(fallbackTasks);
+      setApiError(false); // Disable showing API error popup entirely
     } finally {
       setLoading(false);
     }
@@ -320,6 +294,22 @@ function App() {
       return;
     }
 
+    const localId = editingTask ? editingTask.id : `task-${Date.now()}`;
+    const fallbackTask = {
+      id: localId,
+      title: formData.title.toUpperCase(),
+      description: formData.description,
+      category: formData.category,
+      priority: formData.priority,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      durationHours: formData.durationHours ? Number(formData.durationHours) : null,
+      durationMinutes: formData.durationMinutes ? Number(formData.durationMinutes) : null,
+      completed: editingTask ? editingTask.completed : false,
+      createdAt: editingTask ? editingTask.createdAt : new Date().toISOString(),
+      date: currentDate
+    };
+
     try {
       const method = editingTask ? 'PUT' : 'POST';
       const url = editingTask
@@ -364,12 +354,31 @@ function App() {
         throw new Error("Failed to submit task");
       }
     } catch (error) {
-      console.error(error);
-      setApiError(true);
+      console.error("API submit failed, saving locally:", error);
+      const currentTasks = getLocalTasks(currentDate);
+      let updatedTasks;
+      if (editingTask) {
+        updatedTasks = currentTasks.map(t => t.id === editingTask.id ? fallbackTask : t);
+      } else {
+        updatedTasks = [...currentTasks, fallbackTask];
+      }
+      saveLocalTasks(currentDate, updatedTasks);
+      setTasks(updatedTasks);
+      
+      setIsModalOpen(false);
+      resetForm();
+      setEditingTask(null);
+      setApiError(false);
     }
   };
 
   const toggleComplete = async (task) => {
+    // Optimistic local update
+    const currentTasks = getLocalTasks(currentDate);
+    const updatedTasks = currentTasks.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t);
+    saveLocalTasks(currentDate, updatedTasks);
+    setTasks(updatedTasks);
+
     try {
       const response = await fetch(`${apiBaseUrl}/${task.id}`, {
         method: 'PUT',
@@ -387,30 +396,36 @@ function App() {
         throw new Error("Failed to toggle completion");
       }
     } catch (error) {
-      console.error(error);
-      setApiError(true);
+      console.error("API toggle completion failed, updated locally:", error);
+      setApiError(false);
     }
   };
 
   const deleteTask = async (id) => {
+    // Optimistic local update
+    const currentTasks = getLocalTasks(currentDate);
+    const updatedTasks = currentTasks.filter(t => t.id !== id);
+    saveLocalTasks(currentDate, updatedTasks);
+    setTasks(updatedTasks);
+
+    // Clean up from localStorage backup map
+    const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
+    delete localDurations[id];
+    localStorage.setItem('REACT_APP_TASK_DURATIONS', JSON.stringify(localDurations));
+
     try {
       const response = await fetch(`${apiBaseUrl}/${id}`, {
         method: 'DELETE'
       });
       if (response.ok) {
-        // Clean up from localStorage backup map
-        const localDurations = JSON.parse(localStorage.getItem('REACT_APP_TASK_DURATIONS') || '{}');
-        delete localDurations[id];
-        localStorage.setItem('REACT_APP_TASK_DURATIONS', JSON.stringify(localDurations));
-
         fetchTasks();
         setApiError(false);
       } else {
         throw new Error("Failed to delete task");
       }
     } catch (error) {
-      console.error(error);
-      setApiError(true);
+      console.error("API delete failed, deleted locally:", error);
+      setApiError(false);
     }
   };
 
