@@ -360,7 +360,7 @@ function App() {
     const remainingSeconds = total24hSeconds - elapsedSeconds;
     
     if (remainingSeconds <= 0) {
-      return "00:00:00";
+      return "expired";
     }
     
     const hours = Math.floor(remainingSeconds / 3600);
@@ -890,13 +890,19 @@ function App() {
                       
                       {/* Live Ticking remaining count for uncompleted tasks */}
                       {!task.completed && (
-                        <div className={`hidden sm:flex px-3.5 py-2 rounded-2xl border font-mono items-center gap-1.5 font-bold animate-pulse text-[11px] ${
-                          isDark
-                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
-                            : 'bg-rose-50 border-rose-100 text-rose-600 shadow-sm'
+                        <div className={`hidden sm:flex px-3.5 py-2 rounded-2xl border font-mono items-center gap-1.5 font-bold text-[11px] ${
+                          remainingStr === "expired"
+                            ? isDark
+                              ? 'bg-rose-500/20 border-rose-500/35 text-rose-350 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
+                              : 'bg-rose-100 border-rose-250 text-rose-700 shadow-sm'
+                            : isDark
+                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-400 animate-pulse'
+                            : 'bg-rose-50 border-rose-100 text-rose-600 shadow-sm animate-pulse'
                         }`}>
-                          <Hourglass className="w-3.5 h-3.5 animate-spin-slow shrink-0" />
-                          <span>{remainingStr}</span>
+                          <Hourglass className={`w-3.5 h-3.5 shrink-0 ${remainingStr === 'expired' ? 'text-rose-400' : 'animate-spin-slow'}`} />
+                          <span>
+                            {remainingStr === 'expired' ? "Đã hết hạn ⚠️" : remainingStr}
+                          </span>
                         </div>
                       )}
 
