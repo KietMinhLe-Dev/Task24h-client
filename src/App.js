@@ -165,6 +165,32 @@ function App() {
       setApiError(false);
     } catch (error) {
       console.error(error);
+      
+      // Self-healing recovery fallback in both directions (bridges task2h-api and task24h-api differences)
+      let fallbackUrl = null;
+      if (apiBaseUrl.includes('task2h-api.onrender.com')) {
+        fallbackUrl = apiBaseUrl.replace('task2h-api', 'task24h-api');
+      } else if (apiBaseUrl.includes('task24h-api.onrender.com')) {
+        fallbackUrl = apiBaseUrl.replace('task24h-api', 'task2h-api');
+      }
+
+      if (fallbackUrl) {
+        try {
+          const fallbackResponse = await fetch(`${fallbackUrl}?date=${currentDate}`);
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setTasks(fallbackData);
+            setApiBaseUrl(fallbackUrl);
+            localStorage.setItem('REACT_APP_API_BASE_URL', fallbackUrl);
+            setApiError(false);
+            setLoading(false);
+            return;
+          }
+        } catch (fbErr) {
+          console.error("Self-healing fallback failed:", fbErr);
+        }
+      }
+      
       setApiError(true);
     } finally {
       setLoading(false);
