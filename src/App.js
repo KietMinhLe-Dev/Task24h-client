@@ -417,25 +417,20 @@ function App() {
 
           <div className="flex items-center gap-3">
             {/* Dynamic API Status and Settings Button */}
-            <button
-              onClick={() => {
-                setConfigUrl(apiBaseUrl);
-                setIsConfigOpen(true);
-              }}
-              className={`h-11 px-4 rounded-2xl flex items-center gap-2 text-xs font-extrabold transition-all border ${
-                apiError
-                  ? 'bg-rose-500/15 text-rose-400 border-rose-500/35 hover:bg-rose-500/25'
-                  : isDark
-                  ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-                  : 'bg-slate-100 border-slate-200 text-slate-650 hover:bg-slate-200'
-              }`}
-              title="Cấu hình Kết nối Máy chủ API"
-            >
-              <Settings className={`w-4 h-4 shrink-0 ${apiError ? 'animate-pulse text-rose-450' : 'text-emerald-500'}`} />
-              <span className="hidden md:inline">
-                {apiError ? "Lỗi kết nối API" : "Đã liên kết API"}
-              </span>
-            </button>
+            {/* Dynamic API Status and Settings Button (Only visible on connection error) */}
+            {apiError && (
+              <button
+                onClick={() => {
+                  setConfigUrl(apiBaseUrl);
+                  setIsConfigOpen(true);
+                }}
+                className="h-11 px-4 rounded-2xl flex items-center gap-2 text-xs font-extrabold transition-all border bg-rose-500/15 text-rose-450 border-rose-500/35 hover:bg-rose-500/25"
+                title="Cấu hình Kết nối Máy chủ API"
+              >
+                <Settings className="w-4 h-4 shrink-0 animate-pulse text-rose-450" />
+                <span className="hidden md:inline">Lỗi kết nối API</span>
+              </button>
+            )}
 
             <button
               onClick={() => setIsDark(!isDark)}
