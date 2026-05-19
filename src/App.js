@@ -21,7 +21,6 @@ import {
   Zap,
   TrendingUp,
   Lightbulb,
-  Globe,
   Settings,
   AlertTriangle
 } from 'lucide-react';
@@ -432,7 +431,7 @@ function App() {
               }`}
               title="Cấu hình Kết nối Máy chủ API"
             >
-              <Globe className={`w-4 h-4 shrink-0 ${apiError ? 'animate-pulse text-rose-450' : 'text-emerald-500'}`} />
+              <Settings className={`w-4 h-4 shrink-0 ${apiError ? 'animate-pulse text-rose-450' : 'text-emerald-500'}`} />
               <span className="hidden md:inline">
                 {apiError ? "Lỗi kết nối API" : "Đã liên kết API"}
               </span>
