@@ -24,6 +24,19 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
+// Check if a hostname is local (development / local network LAN)
+const isLocalHostname = (hostname) => {
+  if (!hostname) return false;
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('10.') ||
+    hostname.startsWith('172.') ||
+    hostname.endsWith('.local')
+  );
+};
+
 // Dynamic API URL getter with a smart heuristic domain fallback
 const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
@@ -42,20 +55,23 @@ const getApiBaseUrl = () => {
       }
     }
     
-    // Smart heuristic guess: if we are on Render, automatically point to the corresponding API domain
+    // 1. Smart heuristic guess: if we are on Render, automatically point to the corresponding API domain
     if (hostname.includes('onrender.com')) {
       // Replaces -client with -api automatically to find the deployed backend service
       const guessedApiHost = hostname.replace('-client', '-api').replace('fe.', 'be.');
       return `https://${guessedApiHost}/api/tasks`;
     }
 
-    // Support LAN / local IP routing for other devices (e.g. mobile access over local Wi-Fi)
-    if (hostname && hostname !== '') {
+    // 2. Support LAN / local IP routing for other devices (e.g. mobile access over local Wi-Fi)
+    if (isLocalHostname(hostname)) {
       return `http://${hostname}:5000/api/tasks`;
     }
+
+    // 3. Fallback for public deployments (like Vercel vercel.app), route directly to production Render backend
+    return 'https://task24h-api.onrender.com/api/tasks';
   }
   
-  return process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/tasks';
+  return process.env.REACT_APP_API_BASE_URL || 'https://task24h-api.onrender.com/api/tasks';
 };
 
 // Beautiful Vietnamese motivational quotes
