@@ -98,7 +98,8 @@ function App() {
     category: 'work',
     priority: 'medium',
     startTime: getInitialTimes().startTime,
-    endTime: getInitialTimes().endTime
+    endTime: getInitialTimes().endTime,
+    durationHours: ''
   });
 
   const categories = {
@@ -225,7 +226,8 @@ function App() {
       category: 'work',
       priority: 'medium',
       startTime: times.startTime,
-      endTime: times.endTime
+      endTime: times.endTime,
+      durationHours: ''
     });
   };
 
@@ -313,7 +315,8 @@ function App() {
       category: task.category,
       priority: task.priority,
       startTime: task.startTime || '09:00',
-      endTime: task.endTime || '10:00'
+      endTime: task.endTime || '10:00',
+      durationHours: task.durationHours || ''
     });
     setIsModalOpen(true);
   };
@@ -350,14 +353,15 @@ function App() {
     return new Date().getTime() - 3600 * 1000;
   };
 
-  // Helper: Calculate ticking remaining seconds in a task's 24h budget
+  // Helper: Calculate ticking remaining seconds in a task's dynamic budget
   const getTaskCountdownStr = (task) => {
     const createdTime = getTaskCreationTime(task);
     const now = new Date().getTime();
     
     const elapsedSeconds = Math.floor((now - createdTime) / 1000);
-    const total24hSeconds = 24 * 60 * 60; 
-    const remainingSeconds = total24hSeconds - elapsedSeconds;
+    const budgetHours = task.durationHours ? Number(task.durationHours) : 24;
+    const totalSeconds = budgetHours * 60 * 60; 
+    const remainingSeconds = totalSeconds - elapsedSeconds;
     
     if (remainingSeconds <= 0) {
       return "expired";
@@ -1006,6 +1010,24 @@ function App() {
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className={`w-full text-sm sm:text-base bg-transparent border-none outline-none focus:outline-none focus:ring-0 p-0 resize-none h-44 ${
                         isDark ? 'text-zinc-300 placeholder-zinc-800 font-medium leading-relaxed' : 'text-slate-700 placeholder-slate-405 leading-relaxed'
+                      }`}
+                    />
+                  </div>
+
+                  <div className={`h-[1px] w-full ${isDark ? 'bg-zinc-900/80' : 'bg-slate-100'}`} />
+
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-extrabold text-zinc-555 uppercase tracking-widest flex items-center gap-1.5">
+                      ⏳ Thời hạn đếm ngược (Số giờ)
+                    </label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      placeholder="Mặc định là 24 giờ nếu để trống..."
+                      value={formData.durationHours}
+                      onChange={(e) => setFormData({ ...formData, durationHours: e.target.value })}
+                      className={`w-full text-sm font-bold bg-transparent border-0 outline-none focus:outline-none focus:ring-0 p-0 ${
+                        isDark ? 'text-white placeholder-zinc-800' : 'text-slate-805 placeholder-slate-350'
                       }`}
                     />
                   </div>
