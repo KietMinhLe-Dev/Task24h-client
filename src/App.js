@@ -859,7 +859,7 @@ function App() {
         <section className="space-y-5">
           {/* TOP BAR */}
           <div
-            className={`rounded-3xl p-5 border flex items-center justify-between ${
+            className={`rounded-3xl p-5 border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
               isDark
                 ? 'bg-zinc-900/60 border-zinc-900/80 shadow-2xl'
                 : 'bg-white border-slate-200 shadow-md'
@@ -869,20 +869,20 @@ function App() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                 Ngày hiện tại
               </p>
-              <div className="flex items-center gap-2 mt-1 font-bold">
+              <div className="flex items-center gap-2 mt-1 font-bold text-sm sm:text-base">
                 <Calendar className="w-4 h-4 text-indigo-400" />
                 <span>{currentDate}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <button
                 onClick={() => {
                   const d = new Date(currentDate);
                   d.setDate(d.getDate() - 1);
                   setCurrentDate(d.toISOString().split('T')[0]);
                 }}
-                className={`h-9 px-4 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none h-9 px-4 rounded-xl text-xs font-bold transition-all ${
                   isDark
                     ? 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
@@ -897,7 +897,7 @@ function App() {
                   d.setDate(d.getDate() + 1);
                   setCurrentDate(d.toISOString().split('T')[0]);
                 }}
-                className={`h-9 px-4 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none h-9 px-4 rounded-xl text-xs font-bold transition-all ${
                   isDark
                     ? 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
@@ -949,8 +949,8 @@ function App() {
                   {/* Category Accent Stripe */}
                   <div className={`absolute left-0 top-0 bottom-0 w-[5px] ${category.color} rounded-r-md`} />
 
-                  <div className="flex items-start justify-between gap-5 pl-2">
-                    <div className="flex items-start gap-4 flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pl-2">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1">
                       {/* Checkbox */}
                       <button
                         onClick={() => toggleComplete(task)}
@@ -967,68 +967,90 @@ function App() {
                         )}
                       </button>
 
-                      <div className="flex-1 min-w-0 space-y-1.5">
-                        <h3
-                          className={`text-base sm:text-lg font-bold leading-snug ${
-                            task.completed
-                              ? 'line-through opacity-40'
-                              : isDark ? 'text-white' : 'text-slate-850'
-                          }`}
-                        >
-                          {task.title}
-                        </h3>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3
+                            className={`text-base sm:text-lg font-bold leading-snug break-words ${
+                              task.completed
+                                ? 'line-through opacity-40'
+                                : isDark ? 'text-white' : 'text-slate-850'
+                            }`}
+                          >
+                            {task.title}
+                          </h3>
+
+                          {/* Quick Actions for Mobile */}
+                          <div className="flex items-center gap-1 sm:hidden shrink-0">
+                            <button
+                              onClick={() => openEdit(task)}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                                isDark
+                                  ? 'bg-zinc-850 hover:bg-zinc-800 text-zinc-400 hover:text-white'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-550'
+                              }`}
+                              title="Sửa"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+
+                            <button
+                              onClick={() => deleteTask(task.id)}
+                              className="w-8 h-8 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white flex items-center justify-center transition-all"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
 
                         {task.description && (
-                          <p className={`text-xs leading-relaxed max-w-xl ${
+                          <p className={`text-xs leading-relaxed max-w-xl break-words ${
                             task.completed ? 'opacity-40' : 'opacity-70'
                           }`}>
                             {task.description}
                           </p>
                         )}
 
-                        <div className="flex flex-wrap gap-2 pt-2.5">
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
                           {/* Category Badge */}
                           <div
-                            className={`h-7 px-3.5 rounded-full text-[10px] font-extrabold flex items-center gap-1.5 text-white ${category.color} shadow-sm shadow-black/10`}
+                            className={`h-6 px-2.5 rounded-full text-[9px] sm:text-[10px] font-extrabold flex items-center gap-1 text-white ${category.color} shadow-sm shadow-black/10`}
                           >
                             {category.icon}
                             {category.label}
                           </div>
 
-
-
                           {/* Priority Badge */}
                           <div
-                            className={`h-7 px-3.5 rounded-full text-[10px] font-extrabold border flex items-center gap-1.5 ${pri.badge}`}
+                            className={`h-6 px-2.5 rounded-full text-[9px] sm:text-[10px] font-extrabold border flex items-center gap-1 ${pri.badge}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${pri.dot}`} />
                             <span>{pri.label}</span>
                           </div>
+
+                          {/* Live Ticking remaining count - Now visible on mobile as a neat badge! */}
+                          {!task.completed && (
+                            <div className={`h-6 px-2.5 rounded-full font-mono flex items-center gap-1.5 font-bold text-[9px] sm:text-[10px] border ${
+                              remainingStr === "expired"
+                                ? isDark
+                                  ? 'bg-rose-500/20 border-rose-500/35 text-rose-350'
+                                  : 'bg-rose-100 border-rose-250 text-rose-700'
+                                : isDark
+                                ? 'bg-rose-500/10 border-rose-500/20 text-rose-400 animate-pulse'
+                                : 'bg-rose-50 border-rose-100 text-rose-600 animate-pulse'
+                            }`}>
+                              <Hourglass className={`w-3 h-3 shrink-0 ${remainingStr === 'expired' ? 'text-rose-400' : 'animate-spin-slow'}`} />
+                              <span>
+                                {remainingStr === 'expired' ? "Hết hạn" : remainingStr}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* ACTIONS ROW */}
-                    <div className="flex items-center gap-2.5">
-                      
-                      {/* Live Ticking remaining count for uncompleted tasks */}
-                      {!task.completed && (
-                        <div className={`hidden sm:flex px-3.5 py-2 rounded-2xl border font-mono items-center gap-1.5 font-bold text-[11px] ${
-                          remainingStr === "expired"
-                            ? isDark
-                              ? 'bg-rose-500/20 border-rose-500/35 text-rose-350 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-                              : 'bg-rose-100 border-rose-250 text-rose-700 shadow-sm'
-                            : isDark
-                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-400 animate-pulse'
-                            : 'bg-rose-50 border-rose-100 text-rose-600 shadow-sm animate-pulse'
-                        }`}>
-                          <Hourglass className={`w-3.5 h-3.5 shrink-0 ${remainingStr === 'expired' ? 'text-rose-400' : 'animate-spin-slow'}`} />
-                          <span>
-                            {remainingStr === 'expired' ? "Đã hết hạn ⚠️" : remainingStr}
-                          </span>
-                        </div>
-                      )}
-
+                    {/* ACTIONS COLUMN (Only visible on screens >= sm) */}
+                    <div className="hidden sm:flex items-center gap-2.5 shrink-0">
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button
                           onClick={() => openEdit(task)}
@@ -1050,7 +1072,6 @@ function App() {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-
                     </div>
                   </div>
                 </div>
